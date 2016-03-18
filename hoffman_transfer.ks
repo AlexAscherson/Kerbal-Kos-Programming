@@ -10,6 +10,14 @@ function transfer_node{
         execute_node().
         delete circ.
     }
+    if ship:orbit:inclination <> tgtbody:orbit:inclination {
+        notify("Matching Inclination").
+        copy inc from 0.
+        run inc.
+        match__target_inclination_node().
+        execute_node().
+        delete circ.
+    }
 
     set done to False.
     set delaynode to 0.
@@ -24,6 +32,7 @@ function transfer_node{
             print "T+" + round(missiontime) + " WARNING! No encounter found.".
             remove nd.
             set done to True.
+            return false.
         } else {
 
             if encounter:body:name = tgtbody:name {

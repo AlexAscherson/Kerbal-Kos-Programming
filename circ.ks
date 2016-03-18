@@ -34,8 +34,6 @@ function Circ_with_node{
   set sma to obt:semimajoraxis.
   // Local Body Gravatational parameter
   set Gm to body:mu.
-  // Current Velocity
-  //set v to sqrt(Gm * (2/distance_from_centre -1/sma)).
   // v at Apogee and Perigee
   set vAp to sqrt(Gm * (2/distance_from_centre_Ap -1/sma)).
   set vPe to sqrt(Gm * (2/distance_from_centre_Pe -1/sma)). 

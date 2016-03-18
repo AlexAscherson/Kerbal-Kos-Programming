@@ -10,7 +10,7 @@ function get_safe_orbit{
 	set safeorbit[Ike]    to 13500.
 	
 	set safeorbit[Eve]    to 97500.
-	set safeorbit[Ghilly] to 7500.
+	set safeorbit[Gilly] to 7500.
 
 	set safeorbit[Dres]   to 6500.
 
@@ -22,10 +22,10 @@ function get_safe_orbit{
 	set safeorbit[Bop]    to 23000.
 	set safeorbit[Pol]    to 6000.
 	set safeorbit[Laythe] to 56000.
-	set safeorbit[Val]    to 9000.
+	set safeorbit[Vall]    to 9000.
 	set safeorbit[Tylo]   to 13500.
 
-  set current_safeorbit to safeorbit[body].
+  set current_safeorbit to safeorbit[ship:body].
   return current_safeorbit.
 
 }

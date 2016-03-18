@@ -1,3 +1,5 @@
+execute_mission_profile().
+
 function execute_mission_profile{
 
   print "STARTING".
@@ -9,15 +11,15 @@ function execute_mission_profile{
   set mission_profile["Mission"]        to "Land".
   set mission_profile["Mission_target"] to "None".
 
-  Mission_stage1(mission_profile).
-  Mission_stage2(mission_profile).
-  Mission_stage3(mission_profile).
+  Mission_stage_launch(mission_profile).
+  Mission_stage_transfer(mission_profile).
+  Mission_stage_land(mission_profile).
 
 }
 
   //Launch and circ
   
-function Mission_stage1{
+function Mission_stage_launch{
   parameter mission_profile.
   if alt:radar < 100 and ship:body:name = "kerbin" {  // Landed At KSC -> Launch
     copy ascent from 0.
@@ -32,7 +34,7 @@ function Mission_stage1{
   }
 }
   
-function Mission_stage2{
+function Mission_stage_transfer{
   parameter mission_profile.
   copy establish_orbit from 0.
   run establish_orbit.
@@ -56,21 +58,23 @@ function Mission_stage2{
   }
 }
 
-function Mission_stage3{
+function Mission_stage_land{
   parameter mission_profile.
       
   if ship:body = mission_profile["Target_Body"] {
-    if mission_profile["Mission"] = "Land"{           
-      copy descent from 0.
-      run descent.
-      descend_to_land().
-      notify("Landing Mission Complete").
+    if mission_profile["Mission"] = "Land"{ 
+        if ship:status <> "LANDED" {          
+          copy descent from 0.
+          run descent.
+          descend_to_land().
+          notify("Landing Mission Complete").
+      } else {
+        notify("landed on target body - Mission Complete").
+        return true.
+      }
     }
   } else {
     notify ("Conditions Incorrect to execute mission stage 3").
     return false.
   }
-
 }
-
-execute_mission_profile().

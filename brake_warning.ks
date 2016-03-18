@@ -1,5 +1,3 @@
-copy brake_warning_debug from 0.
-run brake_warning_debug.
 
 function get_terrain{
   declare parameter p1, b, d, radius. //(start point,bearing,distance,radius(planet/moon)).
@@ -16,17 +14,14 @@ function get_terrain{
 
 function get_local_grav_acceleration{
   set gConst to 6.67384*10^(0-11). // The Gravitational constant
-  //print "Local grav acceleration"+ gConst*body:Mass/((altitude+body:Radius)^2).
   return gConst*body:Mass/((altitude+body:Radius)^2).
 }
 
 function get_max_acceleration{
   parameter ship_orientation is "vertical".
   if ship_orientation = "vertical"{
-    // print "Max acceleration - grav"+ ((maxthrust/ship:mass)-get_local_grav_acceleration()).
     return (maxthrust/ship:mass)-get_local_grav_acceleration().
   } else {
-    // print "Max acceleration - Horizontal"+ (maxthrust/ship:mass).
     return (maxthrust/ship:mass).
   }
 }
@@ -79,60 +74,40 @@ function time_to_change_speed{
   }
   return abs(time_needed).
 }
-function get_impact_time {
 
-  parameter ship_alt IS (altitude-ship:geoposition:terrainheight).
-  parameter ship_vertical_speed IS -SHIP:VERTICALSPEED.
-  parameter grav_parameter IS get_local_grav_acceleration().
-  RETURN (SQRT(ship_vertical_speed^2 + 2 * grav_parameter * ship_alt) - ship_vertical_speed) / grav_parameter.
-}
-
-function get_impact_time2 {
-
-  parameter height IS (altitude-ship:geoposition:terrainheight). // didnt have alt true n fiel..
-  parameter existing_speed IS -SHIP:VERTICALSPEED.
-
-  set time_to_impact to SQRT((2*(get_local_grav_acceleration()*height)+ existing_speed^2)).
-  return time_to_impact.
-}
-
-function get_impact_distance{
-  return distance_travelled_under_acceleration_over_time("horizontal_burn", get_impact_time(), groundspeed, 0).
-}
 
 function get_brake_warning{
-  // The max distance we can start breaking is the amount that it would take to stop our horizontal speed.
-  set safetymarginalt to 1.15.
-  lock prediction_distance to distance_travelled_under_acceleration_over_time("horizontal_burn", time_to_change_speed("horizontal_stop")). 
 
-  // Impact point is trajectory where our predicted alt falls below the terain hight. // Two minuses make a positive.
-  lock terrain_position_at_stop_point to get_terrain(ship:geoposition,ship:bearing,prediction_distance,body:radius).
-  // We step forward ^
+  set safetymarginalt to 1.15.
+
+  lock prediction_distance to distance_travelled_under_acceleration_over_time("horizontal_burn", time_to_change_speed("horizontal_stop")). 
+  lock terrain_position_at_prediction to get_terrain(ship:geoposition,ship:bearing,prediction_distance,body:radius).
+
   lock predicted_fall to distance_travelled_under_acceleration_over_time("Gravity", time_to_change_speed("horizontal_stop")).
   lock predicted_alt_after_fall to (altitude - predicted_fall).
   lock verticalspeed_after_fall to (verticalspeed-abs(get_local_grav_acceleration()*time_to_change_speed("horizontal_stop"))).
-  
-  // We step down ^
-  lock predicted_true_alt_after_fall to (predicted_alt_after_fall - terrain_position_at_stop_point:terrainheight)*safetymarginalt.//
-  lock predicted_time_to_impact to get_impact_time(predicted_true_alt_after_fall,(verticalspeed_after_fall)).
-  // We get the distance from the ground after falling during the horizontal stop.
+
+  lock predicted_true_alt_after_fall to (predicted_alt_after_fall - terrain_position_at_prediction:terrainheight)*safetymarginalt.//
+
   if predicted_true_alt_after_fall < distance_travelled_under_acceleration_over_time("vertical_burn", time_to_change_speed("vertical_stop",0,verticalspeed_after_fall),verticalspeed_after_fall){
     print "!!!Impact Alert!!! - Predicted Alt < Vertical Stopping Distance".
-    run_brake_log("!!! Ran Brake Warning- Impact !!!").
+    //run_brake_log("!!! Ran Brake Warning- Impact !!!").
     return true.
   } else {
     print "!!! Ran Brake Warning: SAFE !!!".
-    run_brake_log("!!! Ran Brake Warning- SAFE !!!").
-    SET VD TO VECDRAWARGS(
-      terrain_position_at_stop_point:ALTITUDEPOSITION(terrain_position_at_stop_point:TERRAINHEIGHT+100),
-      terrain_position_at_stop_point:POSITION - terrain_position_at_stop_point:ALTITUDEPOSITION(terrain_position_at_stop_point:TERRAINHEIGHT+100),
-      red, "Checking here.", 1, true, 2).
-    set terrain_position_at_stop_point to get_terrain(ship:geoposition,ship:bearing,(prediction_distance*0.5),body:radius).
+    //run_brake_log("!!! Ran Brake Warning- SAFE !!!").
+    
+    SET checkpoint_marker TO VECDRAWARGS(
+      terrain_position_at_prediction:ALTITUDEPOSITION(terrain_position_at_prediction:TERRAINHEIGHT+100),
+      terrain_position_at_prediction:POSITION - terrain_position_at_prediction:ALTITUDEPOSITION(terrain_position_at_prediction:TERRAINHEIGHT+300),
+      red, ".", 2, true, 2).
 
-    SET V2 TO VECDRAWARGS(
-      terrain_position_at_stop_point:ALTITUDEPOSITION(terrain_position_at_stop_point:TERRAINHEIGHT+100),
-      terrain_position_at_stop_point:POSITION - terrain_position_at_stop_point:ALTITUDEPOSITION(terrain_position_at_stop_point:TERRAINHEIGHT+100),
-      blue, "50%", 1, true, 2).
+    set terrain_position_at_prediction_half to get_terrain(ship:geoposition,ship:bearing,(prediction_distance*0.5),body:radius).
+
+    SET halfway_marker TO VECDRAWARGS(
+      terrain_position_at_prediction:ALTITUDEPOSITION(terrain_position_at_prediction_half:TERRAINHEIGHT+100),
+      terrain_position_at_prediction:POSITION - terrain_position_at_prediction:ALTITUDEPOSITION(terrain_position_at_prediction:TERRAINHEIGHT+predicted_true_alt_after_fall),
+      blue, ".", 2, true, 2).
 
     Return False.
   }
