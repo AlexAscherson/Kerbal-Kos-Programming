@@ -1,0 +1,50 @@
+// CALCULATING V FOR CURRENT ORBIT
+
+//We can calculate r at different points along the orbit.
+set r to SHIP:ALTITUDE + body:radius.
+set rAp to APOAPSIS + body:radius.
+set rPE to PERIAPSIS + body:radius.
+
+// The SMA of our current orbit
+set sma to obt:semimajoraxis.
+// Body Gravatational parameter
+set Gm to bodu:mu.
+
+// Current Velocity
+set v to sqrt(Gm( * (2/r -1/sma)).
+// v at Apogee and Perigee
+set vAp to sqrt(Gm( * (2/rAp -1/sma)).
+set vPe to sqrt(Gm( * (2/rPE -1/sma)).	
+
+// Calculating V for a Different orbit
+
+//eg. Circularise to AP - Calc V at current ap, 
+
+// 1. Set the ap and pe of the new orbit
+set rTargetAp to rAp.
+set rTargetPe to rAp.
+
+// SMA of desired orbit
+set smaTarget to (rTargetAp + rTargetPe)/2.
+
+// V at AP in new orbit 
+set vTargetAp to sqrt(Gm( * (2/rTargetAp -1/smaTarget)).
+	
+// V at pe in new orbit 
+set vTargetPe to sqrt(Gm( * (2/rTargetPe -1/smaTarget)).
+
+//Deltav change needed to raise Pe to Ap - Prograde at Ap
+
+set dvCircAp to (vTargetAp - vAp).
+
+//Deltav change needed to lower Ap to pe - Retro at Pe
+
+set dvCircPe to (vPe - vTargetPe).
+
+Print 'v v at ap and v at pe'.
+PRINT v.
+PRINT vAp.
+PRINT vPe.
+Print 'DV change to Circularise at ap and at pe'.
+PRINT dvCircAp.
+PRINT dvCircPe.

@@ -1,0 +1,18 @@
+set gConst to 6.67384*10^(0-11). // The Gravitational constant
+lock heregrav to gConst*body:Mass/((altitude+body:Radius)^2).
+print "v3 - heregrav**" +heregrav.
+// Surface grav
+set surfGrav to gConst*body:Mass/(body:Radius^2).
+print "v2-Surfgrav: "+surfGrav.
+set surfExtraAc to ( (maxthrust/(mass*surfGrav) ) - 1 ) * surfGrav.
+print "v2-Surfextraac: "+ surfExtraAc.
+
+set a to (maxthrust/mass) - surfGrav.
+print "max acceleration(mp/s?): " + a.
+set vi to verticalspeed.
+
+set t to vi/a.
+print "time to reduce velocity at full speed.(secs)"+t.
+
+set h to vi(vi/a)-0.5(vi^2/a^2)*a.
+print "alt to start burn: "+h.

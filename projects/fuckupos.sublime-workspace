@@ -1,0 +1,408 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"ship",
+				"ship_max_acceleration"
+			],
+			[
+				"su",
+				"suicide"
+			],
+			[
+				"pr",
+				"print"
+			],
+			[
+				"e",
+				"endburn"
+			],
+			[
+				"u",
+				"up"
+			],
+			[
+				"tim",
+				"timetoimpactv1"
+			],
+			[
+				"f",
+				"false"
+			],
+			[
+				"pro",
+				"projectedspeed"
+			],
+			[
+				"la",
+				"landingspeed"
+			],
+			[
+				"time",
+				"timetoimpactv"
+			],
+			[
+				"ve",
+				"VERTICALSPEED"
+			],
+			[
+				"a",
+				"altiude"
+			],
+			[
+				"r",
+				"runmode"
+			],
+			[
+				"h",
+				"hLanding"
+			],
+			[
+				"t",
+				"throttle"
+			],
+			[
+				"el",
+				"eliminate_horiztonal_speed"
+			],
+			[
+				"sh",
+				"shipmass"
+			],
+			[
+				"ma",
+				"maxt"
+			],
+			[
+				"or",
+				"orbitalperiodship"
+			],
+			[
+				"al",
+				"altitude"
+			],
+			[
+				"cal",
+				"CalcHoffmantransfer"
+			],
+			[
+				"eta",
+				"etanode"
+			],
+			[
+				"ap",
+				"APOAPSIS"
+			],
+			[
+				"targeta",
+				"targetalt"
+			],
+			[
+				"Per",
+				"PERIAPSIS"
+			],
+			[
+				"rPe",
+				"rPe"
+			],
+			[
+				"dc",
+				"dvCircA"
+			],
+			[
+				"Pe",
+				"PERIAPSIS"
+			],
+			[
+				"c",
+				"current"
+			],
+			[
+				"rt",
+				"rTargetPe"
+			],
+			[
+				"dv",
+				"dvCircA"
+			],
+			[
+				"v",
+				"vPe"
+			],
+			[
+				"vT",
+				"vTargetAp"
+			],
+			[
+				"rTa",
+				"rTargetAp"
+			],
+			[
+				"Vt",
+				"vTargetPe"
+			],
+			[
+				"vt",
+				"vTargetAp"
+			],
+			[
+				"ta",
+				"targetapoapsis"
+			],
+			[
+				"g",
+				"Gm"
+			],
+			[
+				"Apo",
+				"APOAPSIS"
+			],
+			[
+				"S",
+				"SET"
+			],
+			[
+				"A",
+				"APOAPSIS"
+			],
+			[
+				"TH",
+				"THROTTLE"
+			],
+			[
+				"w",
+				"WHEN"
+			],
+			[
+				"line",
+				"linelet"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "//Hal mk1.\n\n	//Guide\n	//Set for static variables, lock indictes that if a dependent varaible changes the value should update.\n    // Lock expressions to cut down on the number of statements in a loop:\n    \n// Local Graviational forces\nset gConst to 6.67384*10^(0-11). // The Gravitational constant\nset ship_gravity_acceleration_at_surface to gConst*body:Mass/(body:Radius^2). // Mp/s\n\nlock ship_local_gravity_acceleration to gConst*body:Mass/((altitude+body:Radius)^2). // Mp/s \n// Can also be written as lock grav to ship:sensors:grav:mag.\n\n\n// Ship Properties\nlock ship_max_acceleration to maxthrust/mass.\nlock ship_max_acceleration_surface to (maxthrust/mass) - ship_gravity_acceleration_at_surface.  // Mp/s\n\nlock ship_local_thrust_to_weight_ratio to maxthrust/(ship_local_gravity_acceleration*mass).\n\n\n// Navigation\n\n// Hover throttle setting that would make ship rate of descent constant in vacuum:\nlock hovth to ((mass*ship_local_gravity)) * (1/cossteerup) / maxthrust .\nset hovth0 to ship_local_gravity_acceleration/ship_max_acceleration.  //How can this be right?\n\n// Set the max throttle as a percentage,\n\n// The acceleration I can do above and beyond what is needed to hover: // \nlock available_acceleration to (ship_local_thrust_to_weight_ratio - 1) * ship_local_gravity_acceleration.\n\n\nset done to 0. \nset mode to 1.\nuntil done = 0 {\n\n  print \"ship_local_gravity_acceleration\" + ship_local_gravity_acceleration.\n  print \"ship_gravity_acceleration_at_surface\" + ship_gravity_acceleration_at_surface.\n  print \"ship_max_acceleration\" + ship_max_acceleration.\n  print \"ship_max_acceleration_surface\" + ship_max_acceleration_surface.\n  print \"ship_local_thrust_to_weight_ratio\" + ship_local_thrust_to_weight_ratio.\n\n  Print \"///// Steering //////\".\n  print \"Vector Speed\" + absspd.\n  print \"Vector Cosine between steering and up\" + cossteerup.\n  print \"Hover Throttle setting:\" + hovth.\n  print \"Hover Throttle setting2:\" + hovth0.\n\n // if VerticalSpeed > 0.5 {\n //   set throttle to (available_acceleration/100)*25.\n // }\n\n\n\n}",
+			"file": "fuckup_general_maths.ks",
+			"file_size": 2215,
+			"file_write_time": 131019133594385879,
+			"settings":
+			{
+				"buffer_size": 2035,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/Alex/Desktop/backupworkinghomework",
+		"/C/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program/Ships/Script/second.ks",
+		"/C/Program Files (x86)/Steam/steamapps/common/Kerbal Space Program/Ships/Script/first.ks"
+	],
+	"find":
+	{
+		"height": 36.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"absvsup",
+			"twr",
+			"heregrav",
+			"cons",
+			"altAGL",
+			"descendBot",
+			"thOff",
+			"set spd to absspd.\npTime",
+			"dTime",
+			"surfExtraAc",
+			"airbrakeMult",
+			"spd",
+			"gHeight",
+			"descendBotSpeed",
+			"twr",
+			"  \nheregrav",
+			"descendTop",
+			"hLanding",
+			"shipangularpostion_manuever_stored",
+			"asm",
+			"vh",
+			"averageveloci",
+			"ship_sma",
+			"smah",
+			"va",
+			"at0",
+			"da",
+			"smas",
+			"smat",
+			"ops",
+			"opt",
+			"as0",
+			"asnow",
+			"eta",
+			"rb",
+			"status"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"absolute_vector_up",
+			"ship_thrust_to_weight_ratio",
+			"ship_local_gravity",
+			"shipangularpostion_manuever",
+			"shipangularpostion_manuever_stored",
+			"transferdv",
+			"averagevelocity",
+			"sma_ship",
+			"sma_transfer",
+			"averageveloci",
+			"averagevelocity",
+			"targetangularpostioncurrent",
+			"transferangle",
+			"ship_sma",
+			"target_sma",
+			"orbitalperiodship",
+			"orbitalperiodtarget",
+			"shipangularpostion_manuever",
+			"shipangularpostion_current",
+			"current_shipangularpostion",
+			"etanode",
+			"bodyradius",
+			"motherstatus"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "fuckup_general_maths.ks",
+					"settings":
+					{
+						"buffer_size": 2035,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2030,
+								2030
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/kOS-Sublime-master/kos.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 456.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"replace":
+	{
+		"height": 66.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true
+}
