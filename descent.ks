@@ -18,63 +18,63 @@ function Update_landing_Variables{
 
 function Descend_to_min_safe_orbit{
 
-  parameter safety_margin is 0.
+  parameter safety_margin is 2000.
   set min_safe_orbit to get_safe_orbit()+safety_margin.
   print "Running Min safe orbit".
-  //200m is our safety threshold.
-  if periapsis > (min_safe_orbit-200) { // If orbit above min safety threshold.
-    if ship:orbit:hasnextpatch {
-      notify("Descend to min safe orbit - We are Flying by - Establish Orbit").
-      Establish_orbit().
+  until false {
+    if ((apoapsis+periapsis)/2) - min_safe_orbit > 300 {
+      if ship:orbit:hasnextpatch {
+        notify("Descend to min safe orbit - We are Flying by - Establish Orbit").
+        Establish_orbit().
+      }
+      if periapsis > (min_safe_orbit+200) { // IF is to high
+        notify("Descend to min safe orbit - PE = High -Lowering PE to minimum").
+        node_change_apsis("p",min_safe_orbit).
+        print "min safe orbit" + min_safe_orbit.
+        execute_node().
+        node_change_apsis("a", min_safe_orbit).
+        execute_node().
+      } else if periapsis < (min_safe_orbit+200) and periapsis > (min_safe_orbit-200) and (apoapsis-periapsis) > 500 {
+        notify("PE - OK - Changing AP").
+        node_change_apsis("a", min_safe_orbit).
+        execute_node().
+      } else if periapsis < (min_safe_orbit-200){
+          notify("Danger - Periapsis is Low.").
+          if eta:apoapsis < ETA:Periapsis {
+            node_change_apsis("p",min_safe_orbit).
+            execute_node.
+          } else {
+            notify("We have passed apoapsis - Emergency deorbit").
+            return false.
+          }
+      } else {
+        notify("Error Unknown state.").
+      }
+    } else {
+      notify("Safe orbit established").
+      return true.
     }
-    if periapsis > (min_safe_orbit+200) {
-      node_change_apsis("p",min_safe_orbit).
-      notify("Descend to min safe orbit - PE = High -Lowering PE to minimum").
-      execute_node().
-    } 
-    if periapsis < (min_safe_orbit+200) and apoapsis > (min_safe_orbit+200){  // periapsis is in safe zone - Circularise and deorbit
-      circ_with_node("p").
-      notify("Descend to min safe orbit - PE = OK, AP = High - Circularising").
-      execute_node().
-    }
-  }
-  if periapsis < (min_safe_orbit-200) and periapsis > 0 { // If orbit below min safety threshold.
-    notify("Descend to min safe orbit - PE = LOW - Deorbiting").
-    deorbit().
-    return false.
-  }
-  if periapsis < 0 {
-    notify("Descend to min safe orbit - Aborted - Sub orbital Trajectory Detected.").
   }
 }
 
 function Deorbit {
-  
-  set deorbit_setting to 0.
-  set min_safe_orbit to get_safe_orbit().
 
-  if periapsis < (min_safe_orbit-200) and periapsis > 0 {
-    notify("Starting Deorbit - PE Low"). 
-    set deorbit_setting to 1.
-  }
-  if periapsis > (min_safe_orbit-200) and periapsis < (min_safe_orbit+200) {
-    notify("Starting Deorbit- PE Good -> Warping to PE").
+  if Descend_to_min_safe_orbit() = true {
+    notify("Starting Deorbit - From Min safe orbit-> Warping to PE").
     warpfor(eta:periapsis). 
-    set deorbit_setting to 1.
+  } else {
+    notify("Starting Deorbit - PE Low"). 
   }
-  if periapsis > (min_safe_orbit+200) {
-    notify("Deorbit - Error: PE too High running Descend_to_min_safe_orbit ").
-    Descend_to_min_safe_orbit().
-    set deorbit_setting to 1.
+
+  align_ship(retrograde).
+
+  until periapsis < 1 {
+    lock steering to retrograde.  
+    lock throttle to 1.
+    if periapsis < 1 {break.}.
   }
-  if deorbit_setting = 1 {
-    align_ship(retrograde).
-    until periapsis < 1 {
-      lock steering to retrograde.  
-      lock throttle to 1.
-    }
-    lock throttle to 0.
-  }
+  lock throttle to 0.
+  
 }
 
 function wait_for_suicide_burn_point{
@@ -153,36 +153,38 @@ function touch_down{
 
   until false {
     //print "est vstop alt:"+ distance_travelled_under_acceleration_over_time("vertical_burn", time_to_change_speed("vertical_stop")).
+    set dont_interupt_burn to 0.
     if verticalspeed < -5 {
+      
       if(landing_safety_margin* alt_true()) < distance_travelled_under_acceleration_over_time("vertical_burn", time_to_change_speed("vertical_stop")){
         lock throttle to 1.
+        set dont_interupt_burn to 1.
       }
-    } else {
-      if verticalspeed > 0{
-        lock throttle to 0.
-      }
-      if alt_true < 10 and verticalspeed < 0 and verticalspeed >-4{
-        lock throttle to 0.
-        break.
-      }
-      if alt_true() < 50 {
-            
-        if alt_true() < 20 {
-          lock throttle to throttle_gravity_neutral_vacuum.
-        }
-        if alt_true() < 50 and verticalspeed < -5 {
+    } 
+
+    if alt_true < 10 and verticalspeed < 0 and verticalspeed >-4{
+      lock throttle to 0.
+      break.
+    }
+
+    if alt_true < 50 and dont_interupt_burn = 0 {
+      if verticalspeed < -5 {
           set throttle_gravity_neutral_vacuum_faster to (throttle_gravity_neutral_vacuum *1.10).
           lock throttle to throttle_gravity_neutral_vacuum_faster.
-        }
-        if alt_true() < 50 and verticalspeed > -5 and verticalspeed< -2 {
-          set throttle_gravity_neutral_vacuum_slower to (throttle_gravity_neutral_vacuum *0.9).
-          lock throttle to throttle_gravity_neutral_vacuum_slower.
-        }
-        if alt_true() < 50 and verticalspeed < -1 and verticalspeed > -5 {
-          lock throttle to throttle_gravity_neutral_vacuum.
-        }
-      }  
+      }
+      if verticalspeed > -5 and verticalspeed< -2 {
+        set throttle_gravity_neutral_vacuum_slower to (throttle_gravity_neutral_vacuum *0.9).
+        lock throttle to throttle_gravity_neutral_vacuum_slower.
+      }
+      if verticalspeed < -1 and verticalspeed > -5 {
+        lock throttle to throttle_gravity_neutral_vacuum.
+      }    
     } 
+
+    if verticalspeed > -1{
+      lock throttle to 0.
+    }
+
   }
 
   unlock steering.
@@ -190,7 +192,7 @@ function touch_down{
   set sasmode to "STABILITYASSIST".  
   lock throttle to 0.
   notify("Final Descent").
-  until ship:state = "LANDED"{
+  until ship:status = "LANDED"{
     wait 1.
   } 
   
@@ -200,11 +202,10 @@ function Descend_to_land{
 
   parameter decent_point is "At_PE".
 
-  if decent_point = "At_PE"{
-    Descend_to_min_safe_orbit(2000).
-    Descend_to_min_safe_orbit(1000).
-    decouple_port("transfer_engine_port").
-    decouple_port("transfer_engine").
+  Descend_to_min_safe_orbit(2000).
+  
+
+  if decent_point = "At_PE"{ 
     deorbit().  
     Update_landing_Variables().
     wait_for_suicide_burn_point().

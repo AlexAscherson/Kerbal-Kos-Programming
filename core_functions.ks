@@ -35,22 +35,20 @@ function align_ship{
   //Takes Steering as param
   sas off.
   parameter target_alignment.
-  lock steering to target_alignment.  
+  lock steering to target_alignment. 
+  print "Aligning Craft.". 
   until abs(steering:pitch - facing:pitch) < 0.15 and abs(steering:yaw - facing:yaw) < 0.15{ //Started as wait untill in case of bugs..
-    print "Aligning Craft.".
+    
     lock steering to target_alignment.  
   }
 }
 
 function check_staging {
 
-
-
   UNTIL maxthrust > 0 {
     stage.
     wait 1.
   }
-
 
 }
 
@@ -62,7 +60,7 @@ function node_change_apsis{
     set rPe to PERIAPSIS + body:radius.
     set rTargetAp to APOAPSIS + body:radius.
       if mode = "a" {
-        PRINT "We are changing Ap".
+        PRINT "We are changing the Ap".
         set vPe to sqrt(body:mu * (2/rPE -1/obt:semimajoraxis)). 
         set rTargetAp to targetalt + body:radius.
         set sma_Target to (rTargetAp + (PERIAPSIS + body:radius))/2.
@@ -72,7 +70,7 @@ function node_change_apsis{
         set timetonode to (ETA:PERIAPSIS + time:seconds).
       }
       if mode = "p" {
-        PRINT "We are raising Pe".
+        PRINT "We are changing the Pe".
         set vAp to sqrt(body:mu * (2/rAp -1/obt:semimajoraxis)).
         //Set target AP and PE to Current AP 
         set rTargetPe to targetalt + body:radius.

@@ -1,6 +1,3 @@
-
-
-
 function Launch_from_KSC{
 
   parameter target_alt is 75000.
@@ -36,10 +33,28 @@ function Launch_from_KSC{
       //// Ascent Profile ////
       LOCK THROTTLE TO 1. WAIT 1. STAGE.
       EXECUTE_ASCENT_PROFILE(90, ASCENT_PROFILE, target_alt).
+      
+
+      // Circularise at ap
+      node_change_apsis("p", target_alt).
+      execute_node.
+
+      if (apoapsis - periapsis) > 1000 {
+        if abs(apoapsis - target_alt) > 1000{
+          node_change_apsis("a", target_alt).
+          execute_node.
+        }
+
+        if abs(periapsis - target_alt) > 1000{
+          node_change_apsis("p", target_alt).
+          execute_node.
+        }        
+      }
+
       // Enable Communitron and shutdown
-      TOGGLE LIGHTS.
-      LOCK THROTTLE TO 0.
-      SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
+//      TOGGLE LIGHTS.
+  //    LOCK THROTTLE TO 0.
+    //  SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
     }
   }
   if ascent_mode = "dynamic"{

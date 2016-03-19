@@ -6,15 +6,24 @@ FUNCTION EXECUTE_ASCENT_STEP {
   //PARAMETER newThrust.
 
   SET prevThrust TO MAXTHRUST.
-
+    if abort_ascent_step = 1{
+      "Abort Detected.".
+      lock throttle to 0.
+      return "Abort".
+    } 
   UNTIL FALSE {
-    
+
     clearscreen.
     Print "Next Ascent step Altitude:" + minAlt.
     Print "Throttle:"+ throttle.
-    if Altitude > 50000{
-
-    }
+    
+    if apoapsis > target_alt and periapsis < (target_alt-500) {
+      LOCK THROTTLE to 0.
+      Notify("target AP reached-ending ascent program.").
+      set abort_ascent_step to 1.
+      BREAK.
+    } 
+    
     IF MAXTHRUST < (prevThrust - 10) {
       SET currentThrottle TO THROTTLE.
       LOCK THROTTLE TO 0.
@@ -23,18 +32,17 @@ FUNCTION EXECUTE_ASCENT_STEP {
       SET prevThrust TO MAXTHRUST.
     }
 
-    if SHIP:ALTITUDE > 40000 and deployed_fairing = 0 {
-      declare global deployed_fairing to 1.
-      // Iterates over a list of all parts with the stock fairings module
+    if SHIP:ALTITUDE > 40000  {
       FOR module IN SHIP:MODULESNAMED("ModuleProceduralFairing") { // Stock and KW Fairings
-
-          // and deploys them
-          module:DOEVENT("deploy").
+        if module:allevents:length = 0 {
+          "Fairings already deployed.".
+        } else {
+          module:DOEVENT("deploy").  // and deploys them
           HUDTEXT("Fairing Utility: Aproaching edge of atmosphere; Deploying Fairings", 3, 2, 30, YELLOW, FALSE).
-          PRINT "Deploying Fairings".
+          PRINT "Deploying Fairings". 
+        }                
       }
     }
-
 
     IF ALTITUDE > minAlt {
       LOCK STEERING TO HEADING(direction, newAngle).
@@ -44,21 +52,6 @@ FUNCTION EXECUTE_ASCENT_STEP {
 
     Calculate_ascent_throttle().
     WAIT 0.1.
-
-    if apoapsis > target_alt and periapsis < (target_alt-500) {
-      LOCK THROTTLE to 0.
-      notify("Circularising at AP").
-      Circ_with_node().
-       set maxa to maxthrust/mass.
-       set dob to nextnode:deltav:mag/maxa.     // incorrect: should use tsiolkovsky formula
-       print "T+" + round(missiontime)+" Burn duration: " + round(dob) + "s".
-       notify("Warping to 1 min before burn.").
-       warpfor(nextnode:eta - dob/2 - 60).
-       run execute_node.
-       execute_node().
-      BREAK.
-    } 
- 
   }
 }
 
@@ -68,14 +61,14 @@ FUNCTION EXECUTE_ASCENT_PROFILE {
   PARAMETER target_alt.
 
   SET step TO 0.
+  set abort_ascent_step to 0.
   UNTIL step >= profile:length - 1 {
     EXECUTE_ASCENT_STEP(
       direction,
       target_alt,
       profile[step],
       profile[step+1]
-      //profile[step+2]
-     
+      //profile[step+2]   
     ).
     SET step TO step + 2. //Number of params - removing throttle
   }

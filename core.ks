@@ -8,7 +8,7 @@ function execute_mission_profile{
   run core_functions.
 
   set mission_profile to lexicon().
-  set mission_profile["Target_Body"]    to Mun.
+  set mission_profile["Target_Body"]    to Minmus.
   set mission_profile["Mission"]        to "Land".
   set mission_profile["Mission_target"] to "None".
 
@@ -26,10 +26,9 @@ function Mission_stage_launch{
     copy ascent from 0.
     run ascent.
     notify("Running Ascent Program.").
-    declare global deployed_fairing to 0.
-    Launch_from_KSC().
+    Launch_from_KSC(80000).
     notify("Ascent Program Complete.").
-    delete ascent.
+    //delete ascent.
   } else {
     notify ("Conditions Incorrect to execute mission stage 1").
     return false.
@@ -66,7 +65,12 @@ function Mission_stage_land{
       
   if ship:body = mission_profile["Target_Body"] {
     if mission_profile["Mission"] = "Land"{ 
-        if ship:status <> "LANDED" {          
+        if ship:status <> "LANDED" { 
+          copy establish_parking_orbit from 0.
+          run establish_parking_orbit.
+          establish_parking_orbit(). 
+          decouple_port("transfer_engine_port").
+          decouple_port("transfer_engine").        
           copy descent from 0.
           run descent.
           descend_to_land().
