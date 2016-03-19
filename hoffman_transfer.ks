@@ -4,19 +4,18 @@ function transfer_node{
 
     if (apoapsis-periapsis) > 500 {
         notify("Circularising orbit for Transfer").
-        copy circ from 0.
-        run circ.
+
         circ_with_node().
         execute_node().
-        delete circ.
+
     }
     if ship:orbit:inclination <> tgtbody:orbit:inclination {
         notify("Matching Inclination").
         copy inc from 0.
         run inc.
-        match__target_inclination_node().
+        match_target_inclination_node(tgtbody).
         execute_node().
-        delete circ.
+
     }
 
     set done to False.

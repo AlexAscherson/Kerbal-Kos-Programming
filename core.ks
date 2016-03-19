@@ -3,6 +3,7 @@ execute_mission_profile().
 function execute_mission_profile{
 
   print "STARTING".
+
   copy core_functions from 0.
   run core_functions.
 
@@ -25,6 +26,7 @@ function Mission_stage_launch{
     copy ascent from 0.
     run ascent.
     notify("Running Ascent Program.").
+    declare global deployed_fairing to 0.
     Launch_from_KSC().
     notify("Ascent Program Complete.").
     delete ascent.
@@ -57,6 +59,7 @@ function Mission_stage_transfer{
     return false.
   }
 }
+
 
 function Mission_stage_land{
   parameter mission_profile.

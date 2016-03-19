@@ -16,7 +16,7 @@ function match_target_inclination_node{
   set ams0 to vcrs(ps, ship:velocity:orbit).
   set ams1 to ams0:mag*amm:normalized.
   // inclination between angular momentums
-  set inc to vang(ams0,ams1).
+  local inc is vang(ams0,ams1).
   print "T+" + round(missiontime) + " Inclination " + round(inc,1) + "'".
   if inc > 90 {
       print "T+" + round(missiontime) + " WARNING! Vessel and " + tgtbody:name + " orbit opposite sense.".

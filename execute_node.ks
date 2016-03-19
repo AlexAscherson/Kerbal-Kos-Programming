@@ -3,6 +3,11 @@ function execute_node{
 
     print "Executing Node".
     set nd to nextnode.
+
+    if deltaVstage() < nd:deltav:mag{
+        stage.
+    }
+
     set tset to 0.
     lock throttle to tset.
 
@@ -18,7 +23,8 @@ function execute_node{
     set np to R(0,0,0) * nd:deltav.
     lock steering to nextnode.
     notify("Aligning Ship to burn vector").
-    wait until abs(np:direction:pitch - facing:pitch) < 1.5 and abs(np:direction:yaw - facing:yaw) < 0.5.
+    
+    WAIT UNTIL VANG(SHIP:FACING:VECTOR, nd:BURNVECTOR) < 2.
     Print "warp to burn".
     warpfor(nd:eta - dob/2).
     print "T+" + round(missiontime) + " Orbital burn start " + round(nd:eta) + "s before apoapsis.".

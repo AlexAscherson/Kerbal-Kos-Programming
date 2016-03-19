@@ -32,6 +32,7 @@ function warpfor{
             }
             wait 0.1.
         }
+        Print "Warp Ended".
     }
 
 }

@@ -1,6 +1,4 @@
-copy core_functions from 0.
-run core_functions.
-Launch_from_KSC().
+
 
 
 function Launch_from_KSC{
@@ -8,9 +6,8 @@ function Launch_from_KSC{
   parameter target_alt is 75000.
   parameter ascent_mode is "ascent_profile".
  
-  load_function(execute_node.ks).
-  load_function(circ.ks).
-  run execute_node.ks.
+  copy execute_node.ks from 0.
+  copy circ.ks from 0.
   run circ.ks.
 
   if ascent_mode = "ascent_profile"{
@@ -31,7 +28,7 @@ function Launch_from_KSC{
       target_alt,   0     // 0
     ).
 
-    load_function(ascent_profile.ks).
+    copy ascent_profile.ks from 0.
     Run ascent_profile.ks.
 
     IF ALT:RADAR < 100 {

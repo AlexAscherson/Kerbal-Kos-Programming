@@ -12,7 +12,9 @@ FUNCTION EXECUTE_ASCENT_STEP {
     clearscreen.
     Print "Next Ascent step Altitude:" + minAlt.
     Print "Throttle:"+ throttle.
+    if Altitude > 50000{
 
+    }
     IF MAXTHRUST < (prevThrust - 10) {
       SET currentThrottle TO THROTTLE.
       LOCK THROTTLE TO 0.
@@ -20,11 +22,29 @@ FUNCTION EXECUTE_ASCENT_STEP {
       LOCK THROTTLE TO currentThrottle.
       SET prevThrust TO MAXTHRUST.
     }
+
+    if SHIP:ALTITUDE > 40000 and deployed_fairing = 0 {
+      declare global deployed_fairing to 1.
+      // Iterates over a list of all parts with the stock fairings module
+      FOR module IN SHIP:MODULESNAMED("ModuleProceduralFairing") { // Stock and KW Fairings
+
+          // and deploys them
+          module:DOEVENT("deploy").
+          HUDTEXT("Fairing Utility: Aproaching edge of atmosphere; Deploying Fairings", 3, 2, 30, YELLOW, FALSE).
+          PRINT "Deploying Fairings".
+      }
+    }
+
+
     IF ALTITUDE > minAlt {
       LOCK STEERING TO HEADING(direction, newAngle).
      // LOCK THROTTLE TO newThrust.
       BREAK.
     }
+
+    Calculate_ascent_throttle().
+    WAIT 0.1.
+
     if apoapsis > target_alt and periapsis < (target_alt-500) {
       LOCK THROTTLE to 0.
       notify("Circularising at AP").
@@ -34,12 +54,11 @@ FUNCTION EXECUTE_ASCENT_STEP {
        print "T+" + round(missiontime)+" Burn duration: " + round(dob) + "s".
        notify("Warping to 1 min before burn.").
        warpfor(nextnode:eta - dob/2 - 60).
-      execute_node().
+       run execute_node.
+       execute_node().
       BREAK.
     } 
-
-    Calculate_ascent_throttle().
-    WAIT 0.1.
+ 
   }
 }
 

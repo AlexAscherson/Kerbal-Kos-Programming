@@ -18,7 +18,8 @@ function Update_landing_Variables{
 
 function Descend_to_min_safe_orbit{
 
-  set min_safe_orbit to get_safe_orbit().
+  parameter safety_margin is 0.
+  set min_safe_orbit to get_safe_orbit()+safety_margin.
   print "Running Min safe orbit".
   //200m is our safety threshold.
   if periapsis > (min_safe_orbit-200) { // If orbit above min safety threshold.
@@ -157,6 +158,9 @@ function touch_down{
         lock throttle to 1.
       }
     } else {
+      if verticalspeed > 0{
+        lock throttle to 0.
+      }
       if alt_true < 10 and verticalspeed < 0 and verticalspeed >-4{
         lock throttle to 0.
         break.
@@ -186,7 +190,7 @@ function touch_down{
   set sasmode to "STABILITYASSIST".  
   lock throttle to 0.
   notify("Final Descent").
-  until ship:stats = "LANDED"{
+  until ship:state = "LANDED"{
     wait 1.
   } 
   
@@ -197,7 +201,10 @@ function Descend_to_land{
   parameter decent_point is "At_PE".
 
   if decent_point = "At_PE"{
-    Descend_to_min_safe_orbit().
+    Descend_to_min_safe_orbit(2000).
+    Descend_to_min_safe_orbit(1000).
+    decouple_port("transfer_engine_port").
+    decouple_port("transfer_engine").
     deorbit().  
     Update_landing_Variables().
     wait_for_suicide_burn_point().
