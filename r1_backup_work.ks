@@ -70,11 +70,11 @@ function get_rendevous_nodes{
 
 
     //number of angles thatneed to pass till we get to the right one
-    set angleslefts to angle3 - (phi*(180/constant():pi)).
+    set angleslefts to angle4 - (phi*(180/constant():pi)).
   //  print "ANGLES LEFT: " + round(angleslefts).
 
     //Time till burn window
-    set tb to ((angle3-(phi*(180/constant():pi)))/(57.29577951308*phaseanglerateofchange)). //seconds till window
+    set tb to ((angle4-(phi*(180/constant():pi)))/(57.29577951308*phaseanglerateofchange)). //seconds till window
  //   print tb + " seconds to burn window".
 
     // eta to maneuver node
@@ -116,11 +116,12 @@ function get_rendevous_nodes{
    // print "Time till window2: "+etanode.
 
     //the time to burn is the current time + the time to the correct phase angle.  Travel time needs to be equal to the half of the targets period, - the travel time.
-    print "This is our current angular position" + shipangularpostion_current.
-    Print "This is the position we need to be when we calculate"+ (angle3-( phi*(180/constant():pi))).
+    print "This is our current angular position from PE" + shipangularpostion_current.
+    //  This is 0 at pe, negative between pe and ae up to -180, becomes positive at ap and declines to 0 at pe.
+    Print "This is the position we need to be when we calculate"+ (angle4-( phi*(180/constant():pi))).
     //set warp to 5.
     set angles_per_pecond to 360/ship:orbit:period.
-    set seconds_to_intercept_point to (abs(abs(shipangularpostion_current) - (angle3-( phi*(180/constant():pi))))) /angles_per_pecond.
+    //set seconds_to_intercept_point to (abs(abs(shipangularpostion_current) - (angle4-( phi*(180/constant():pi))))) /angles_per_pecond.
     set intercept_angle to  phi*(180/constant():pi) - angle4.
     set angles_to_intercept to abs(abs(intercept_angle)- abs(shipangularpostion_current) ).
     print "intercept_angle" + intercept_angle.
@@ -129,11 +130,11 @@ function get_rendevous_nodes{
    // print "seconds_to_intercept_point."+seconds_to_intercept_point.
       //clearscreen.
       //print "condition now" + (abs(abs(arctan2(positionlocal:x,positionlocal:z) - (angle4-( phi*(180/constant():pi)))))).
-      print "shipangularpostion_current - position needed=" +  (abs(abs(shipangularpostion_current) - abs((angle3-( phi*(180/constant():pi))))) ).
-      if abs(abs(shipangularpostion_current) - abs((angle3-( phi*(180/constant():pi))))) < 10 {
+    print "shipangularpostion_current - position needed=" +  (abs(abs(shipangularpostion_current) - abs((angle4-( phi*(180/constant():pi))))) ).
+      if angles_to_intercept < 5  {
         print "condition true" + (abs(abs(shipangularpostion_current) - (angle4-( phi*(180/constant():pi))))).
         set warp to 0.
-        if abs(abs(shipangularpostion_current) - abs((angle3-( phi*(180/constant():pi))))) < 0.5 {
+        if angles_to_intercept < 0.5 {
         print "condition true" + (abs(abs(shipangularpostion_current) - (angle4-( phi*(180/constant():pi))))).
         set warp to 0.
         break.
