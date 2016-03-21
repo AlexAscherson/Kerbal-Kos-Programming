@@ -1,5 +1,5 @@
 function establish_orbit{
-
+  // could be renmed establsh orbit from encounter or escapse.
   parameter target_body is ship:body.
 
   if ship:orbit:hasnextpatch {
@@ -29,12 +29,18 @@ function establish_orbit{
       }
       wait 0.5. // Safety margin delay.
       lock throttle to 0.
+      return true.
       
     } else {
-      notify("On escape orbit but no encounter for target orbit - either mistake or target not in local system").
+      notify("On escape orbit but no encounter for target body - either mistake or target not in local system").
     }
     
   } else {
      notify("No Patch Detected.").
+     if ship:body = target_body and ship:status = "ORBITING"{
+        return true.
+     } else {
+      return false.
+     }
   }
 } 

@@ -127,7 +127,18 @@ function get_rendevous_nodes{
     print "angle_to_intercept_point."+angle_to_intercept_point.
       //clearscreen.
       //print "condition now" + (abs(abs(arctan2(positionlocal:x,positionlocal:z) - (angle4-( phi*(180/constant():pi)))))).
-        
+        // intercept angle would be 45 or 225?
+        print+"condition 2: is now right time?"+ abs(225 - abs(shipangularpostion_current)).
+        if abs(225 - abs(shipangularpostion_current)) > 1 or(45 - abs(shipangularpostion_current))< 1{
+          //location is right
+          break.
+        }
+        //or
+        print "condition 1: is now right time?"+ (anglesleft-abs(angle_to_intercept_point)).
+        if (anglesleft-abs(angle_to_intercept_point)) > 44.9 and (anglesleft -abs(angle_to_intercept_point))< 45.9{
+         // location is right.
+         break.
+        }
       if angle_to_intercept_point < 10 {
         print "condition true" + angle_to_intercept_point.
         set warp to 0.

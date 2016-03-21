@@ -59,6 +59,29 @@ function Mission_stage_transfer{
   }
 }
 
+function Mission_stage_establish_orbit{
+
+  copy establish_parking_orbit from 0.
+  run establish_parking_orbit.
+
+  if establish_orbit(mission_profile["Target_Body"]) = true {
+    establish_parking_orbit().
+    if establish_parking_orbit() = true {
+      decouple_port("transfer_engine_port").
+      decouple_port("transfer_engine").     
+    }
+
+  } else {
+    print "establish orbit return false.  Not in traget body and no patch coming up.".
+  }
+
+  if ship:body = mission_profile["Target_Body"] and ship:status = "ORBITING" {
+    establish_parking_orbit().
+  }
+
+
+}
+
 
 function Mission_stage_land{
   parameter mission_profile.
@@ -66,11 +89,9 @@ function Mission_stage_land{
   if ship:body = mission_profile["Target_Body"] {
     if mission_profile["Mission"] = "Land"{ 
         if ship:status <> "LANDED" { 
-          copy establish_parking_orbit from 0.
-          run establish_parking_orbit.
+          
           establish_parking_orbit(). 
-          decouple_port("transfer_engine_port").
-          decouple_port("transfer_engine").        
+            
           copy descent from 0.
           run descent.
           descend_to_land().
