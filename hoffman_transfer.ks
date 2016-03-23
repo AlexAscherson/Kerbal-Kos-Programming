@@ -2,18 +2,18 @@
 function transfer_node{
     parameter tgtbody.    
 
-    if (apoapsis-periapsis) > 500 {
+    if (apoapsis-periapsis) > (apoapsis*0.01) { // check relationly to ap in case very high up.
         notify("Circularising orbit for Transfer").
 
         circ_with_node().
         execute_node().
 
     }
-    if ship:orbit:inclination <> tgtbody:orbit:inclination {
+    if ((ship:orbit:inclination + tgtbody:orbit:inclination-0.2)/2) > (tgtbody:orbit:inclination +0.2) or ((ship:orbit:inclination + tgtbody:orbit:inclination)/2) < (tgtbody:orbit:inclination -0.2) {
         notify("Matching Inclination").
-        copy inc from 0.
-        run inc.
-        match_target_inclination_node(tgtbody).
+        copy inc2 from 0.
+        run inc2.
+        set_inc_lan(tgtbody:orbit:inclination, tgtbody:orbit:LAN).
         execute_node().
 
     }
@@ -32,6 +32,7 @@ function transfer_node{
             remove nd.
             set done to True.
             return false.
+            // Need some logic here to wait for longer or warp till maybe moon gets out of the way.
         } else {
 
             if encounter:body:name = tgtbody:name {
@@ -60,7 +61,7 @@ function CalcHoffmantransfer{
     set currentvelocity to velocity:orbit:mag.          // actual velocity
     set averagevelocity to sqrt( currentvelocity^2 - 2*body:mu*(1/altitudeaverage - 1/altitudecurrent) ). // average velocity 
     set soi to (tgtbody:soiradius).
-    set transferAp to positiontarget:mag - soi/2.
+    set transferAp to positiontarget:mag - soi/3.
 
     //Transfer SMA
     set sma_transfer to (altitudeaverage + transferAp)/2.

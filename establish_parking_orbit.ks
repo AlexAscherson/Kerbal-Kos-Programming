@@ -6,14 +6,16 @@ function establish_parking_orbit{
 	}
 	if ship:status = "orbiting"{
   	set parking_orbit to get_safe_orbit()+10000.
-    if ((apoapsis+periapsis)/2 - parking_orbit) > 300 or ((apoapsis+periapsis)/2 - parking_orbit) < -300{ 
+    if ((apoapsis+periapsis)/2 - parking_orbit) > 500 or ((apoapsis+periapsis)/2 - parking_orbit) < -500{ 
       notify("Establishing parking orbit.").
-    	node_change_apsis("a", parking_orbit).
-    	execute_node().
-    	circ_with_node("a").
+      if periapsis - parking_orbit < -500 or periapsis - parking_orbit  > 500 {
+      	node_change_apsis("p", parking_orbit).
+      	execute_node().
+      }
+    	circ_with_node("p").
       execute_node().
     }
-    if ((apoapsis+periapsis)/2 - parking_orbit) > 300 or ((apoapsis+periapsis)/2 - parking_orbit) < -300{ 
+    if ((apoapsis+periapsis)/2 - parking_orbit) < 500 or ((apoapsis+periapsis)/2 - parking_orbit) > -500{ 
       notify("Parking orbit established").
       return true.
     } else {

@@ -44,49 +44,47 @@ function align_ship{
 }
 
 function check_staging {
-
   UNTIL maxthrust > 0 {
     stage.
     wait 1.
   }
-
 }
 
 function node_change_apsis{
-    parameter mode is "a". 
-    parameter targetalt is 75000.
-    //set targetalt to targetalt*1000.
-    set rAp to APOAPSIS + body:radius.
-    set rPe to PERIAPSIS + body:radius.
-    set rTargetAp to APOAPSIS + body:radius.
-      if mode = "a" {
-        PRINT "We are changing the Ap".
-        set vPe to sqrt(body:mu * (2/rPE -1/obt:semimajoraxis)). 
-        set rTargetAp to targetalt + body:radius.
-        set sma_Target to (rTargetAp + (PERIAPSIS + body:radius))/2.
-        set vTargetP to sqrt(body:mu * (2/(PERIAPSIS + body:radius) -1/sma_Target)).
-        set dv to (vTargetP - vPe).
-        PRINT dv + " DV needed to changet Ap to " + rTargetAp.
-        set timetonode to (ETA:PERIAPSIS + time:seconds).
-      }
-      if mode = "p" {
-        PRINT "We are changing the Pe".
-        set vAp to sqrt(body:mu * (2/rAp -1/obt:semimajoraxis)).
-        //Set target AP and PE to Current AP 
-        set rTargetPe to targetalt + body:radius.
-        // Calulate SMA of target orbit
-        set sma_Target to ((APOAPSIS + body:radius) + rTargetPe)/2.
-        //Calculate new Velocity at Ap 
-        set vTargetA to sqrt(body:mu * (2/(APOAPSIS + body:radius) -1/sma_Target)).
-        //Delta v change between the two orbits.
-        set dv to (vTargetA - vAp).
-        PRINT dv + " DV needed to raise pe to " + rTargetpe.
-        set timetonode to (ETA:APOAPSIS + time:seconds).
-      }
-      // Node
-      print "target Alt: " +targetalt.
-    SET mn TO NODE(timetonode, 0, 0, dv).
-    ADD mn.
+  parameter mode is "a". 
+  parameter targetalt is 75000.
+  //set targetalt to targetalt*1000.
+  set rAp to APOAPSIS + body:radius.
+  set rPe to PERIAPSIS + body:radius.
+  set rTargetAp to APOAPSIS + body:radius.
+    if mode = "a" {
+      PRINT "We are changing the Ap".
+      set vPe to sqrt(body:mu * (2/rPE -1/obt:semimajoraxis)). 
+      set rTargetAp to targetalt + body:radius.
+      set sma_Target to (rTargetAp + (PERIAPSIS + body:radius))/2.
+      set vTargetP to sqrt(body:mu * (2/(PERIAPSIS + body:radius) -1/sma_Target)).
+      set dv to (vTargetP - vPe).
+      PRINT dv + " DV needed to changet Ap to " + rTargetAp.
+      set timetonode to (ETA:PERIAPSIS + time:seconds).
+    }
+    if mode = "p" {
+      PRINT "We are changing the Pe".
+      set vAp to sqrt(body:mu * (2/rAp -1/obt:semimajoraxis)).
+      //Set target AP and PE to Current AP 
+      set rTargetPe to targetalt + body:radius.
+      // Calulate SMA of target orbit
+      set sma_Target to ((APOAPSIS + body:radius) + rTargetPe)/2.
+      //Calculate new Velocity at Ap 
+      set vTargetA to sqrt(body:mu * (2/(APOAPSIS + body:radius) -1/sma_Target)).
+      //Delta v change between the two orbits.
+      set dv to (vTargetA - vAp).
+      PRINT dv + " DV needed to raise pe to " + rTargetpe.
+      set timetonode to (ETA:APOAPSIS + time:seconds).
+    }
+    // Node
+    print "target Alt: " +targetalt.
+  SET mn TO NODE(timetonode, 0, 0, dv).
+  ADD mn.
 }
 
 function decouple_port{
@@ -104,8 +102,7 @@ function decouple_port{
   check_staging().
 }
 
-FUNCTION deltaVstage
-{   
+FUNCTION deltaVstage{   
     // fuel name list
     LOCAL fuels IS list().
     fuels:ADD("LiquidFuel").
@@ -158,4 +155,69 @@ FUNCTION deltaVstage
     LOCAL deltaV IS avgIsp*9.81*ln(SHIP:MASS / (SHIP:MASS-fuelMass)).
 
     RETURN deltaV.
+}
+
+function target_nearest_craft{
+
+  list targets in tlist.
+  set minDist to 5. // don't pick something closer than 5 meters.
+  set smallestDist to 999999999999.
+  set nearestVessel to ship. // so at least it's something.
+  for t in tlist {
+      set thisDist to t:distance.
+      if thisDist < smallestDist and thisDist > minDist {
+          set smallestDist to thisDist.
+          set nearestVessel to t.
+      }.
+  }. 
+
+  if nearestVessel = ship {
+      print "Nope, no other vessels exist".
+  } else {
+    set target to nearestVessel.
+  }
+
+}
+
+function check_if_next_node {
+  local sentinel is node(time:seconds + 9999999999, 0, 0, 0).
+  add sentinel.
+  local nn is nextnode.
+  remove sentinel.
+  if nn = sentinel {
+    return false.
+  } else {
+    return true.
+  }
+}
+
+function utilClosestApproach {
+  parameter ship1.
+  parameter ship2.
+
+  local Tmin is time:seconds.
+  local Tmax is Tmin + 2*ship1:obt:period.
+  local T is 0.
+
+  // Binary search for time of closest approach
+  local N is 0.
+  until N > 64 {
+    local dt is (Tmax - Tmin) / 4.
+    set T to  Tmin + (2*dt).
+    local Tl is Tmin - dt.
+    local Th is Tmax + dt.
+
+    local Rl is (positionat(ship1, Tl)) - (positionat(ship2, Tl)).
+    local Rh is (positionat(ship1, Th)) - (positionat(ship2, Th)).
+
+    if Rh:mag < Rl:mag {
+      set Tmin to T.
+    } else {
+      set Tmax to T.
+    }
+
+    set N to N + 1.
+  }
+
+  return T.
 }

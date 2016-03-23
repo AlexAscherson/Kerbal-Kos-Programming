@@ -1,10 +1,9 @@
-
 function match_target_inclination_node{
   declare parameter tgtbody.
   // create an inclination node
   print "T+" + round(missiontime) + " Inclination maneuver, orbiting " + body:name.
   // compensate for moon frame of reference
-  if body:name = "Kerbin" {
+  if ship:body = Kerbin {
       set vtgt to tgtbody:obt:velocity:orbit.
   } else {
       set vtgt to -1 * tgtbody:obt:body:velocity:orbit.

@@ -3,7 +3,6 @@ function get_rendevous_nodes{
     until false{
         wait 0.1.
         clearscreen.
-
         set currentorbitradius to body:radius+ altitude.
         set targetorbitradius to body:radius + target:altitude.
 
@@ -19,8 +18,6 @@ function get_rendevous_nodes{
         set phi to constant():pi - theta.
         //print "Phase angle needed for rendevous(phi) in rad: " + phi +" rad".
         set phi0 to constant():pi * (1 - sqrt((1+currentorbitradius/targetorbitradius)^3 / 8) ).
-        //print "Safety check: phi0: "+phi0.
-        //print "Phase angle needed for rendevous(phi) in degrees: " + phi*(180/constant():pi) +" deg". // This means that the target must be phi degrees ahead of you when you start the transfer if you are to intercept it at C.
 
         set phaseanglerateofchange to sqrt(body:mu/targetorbitradius^3) - sqrt(body:mu/currentorbitradius^3).
 
@@ -55,8 +52,7 @@ function get_rendevous_nodes{
         Print "This is the position we need to be when we calculate"+ (angle4-( phi*(180/constant():pi))).
         //set seconds_to_intercept_point to (abs(abs(shipangularpostion_current) - (angle4-( phi*(180/constant():pi))))) /angles_per_pecond.
         print "angles_to_intercept" + angles_to_intercept.
-        
-           
+            
         if angles_to_intercept < 5  {
             PRINT "Close to calculation point, kill speed.".
             set warp to 0.
@@ -71,7 +67,6 @@ function get_rendevous_nodes{
     }
     set nd to node(time:seconds + abs(tb), 0, 0, dv1).
     add nd.
-
 }
 
 function establish_rendevous{
@@ -79,12 +74,17 @@ function establish_rendevous{
     run rendevous_lib.
 
     notify("adjusting orbit for rendevous").
-    node_change_apsis("p", target:periapsis-2000).
+    node_change_apsis("p", target:periapsis*0.80).
     execute_node().
-    node_change_apsis("a", target:apoapsis-2000).
+    node_change_apsis("a", target:apoapsis*0.80).
     execute_node().
-    match_target_inclination_node(tgtbody).
+    copy inc from 0.
+    run inc.
+    match_target_inclination_node(target).
     execute_node().
+    notify("Orbit Now Suitable for rendevous").
+    copy execute_node from 0.
+    run execute_node.
     get_rendevous_nodes().
     execute_node().
 
@@ -98,6 +98,5 @@ function establish_rendevous{
 
     rdv_await_nearest(target,500).
     red_cancel_relative_velocity(target).
-
 }
 

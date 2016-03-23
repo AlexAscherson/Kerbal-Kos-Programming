@@ -6,8 +6,8 @@ function ascend_from_moon {
   lock steering to up.
   set runmode to 1.
 
+  print "Waiting for Launch Window".
   SET ANLongitude to target:orbit:LONGITUDEOFASCENDINGNODE.
-
   until floor(longitude + BODY:ROTATIONANGLE) = floor(ANLongitude - 180) OR floor(longitude + BODY:ROTATIONANGLE) = floor(ANLongitude + 180) OR floor(longitude + BODY:ROTATIONANGLE) = floor(ANLongitude){
     set warp to 4.
   }
@@ -42,14 +42,12 @@ function ascend_from_moon {
       lock throttle to 0.
       wait 0.5.
       node_change_apsis("p", apoapsis).
-      copy execute_node from 0.
-      run execute_node.
-      copy time_warp from 0.
-      run time_warp.
+      //copy execute_node from 0.
+      //run execute_node.
+      //copy time_warp from 0.
+      //run time_warp.
       execute_node().
       break.
     }
   }
 }
-run core_functions.
-ascend_from_moon().

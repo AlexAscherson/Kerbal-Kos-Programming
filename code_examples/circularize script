@@ -1,0 +1,28 @@
+/circularization script, starts immediately when called.
+set th to 0.
+lock throttle to th.
+set dV to ship:facing:vector:normalized.
+lock steering to lookdirup(dV, ship:facing:topvector).
+ag1 off. //ag1 to abort
+
+local timeout is time:seconds + 9000.
+when dV:mag < 0.05 then set timeout to time:seconds + 3.
+until ag1 or dV:mag < 0.02 or time:seconds > timeout {
+    set posVec to ship:position - body:position.
+    set vecNormal to vcrs(posVec,velocity:orbit).
+    set vecHorizontal to -1 * vcrs(ship:position-body:position, vecNormal).
+    set vecHorizontal:mag to sqrt(body:MU/(body:Radius + altitude)). //this is the desired velocity vector to obtain circular orbit at current altitude
+
+    set dV to vecHorizontal - velocity:orbit. //deltaV as a vector
+
+    //Debug vectors
+    //set mark_n to VECDRAWARGS(ship:position, vecNormal:normalized * (velocity:orbit:mag / 100), RGB(1,0,1), "n", 1, true).
+    set mark_h to VECDRAWARGS(ship:position, vecHorizontal / 100, RGB(0,1,0), "h", 1, true).
+    set mark_v to VECDRAWARGS(ship:position, velocity:orbit / 100, RGB(0,0,1), "dv", 1, true).
+    set mark_dv to VECDRAWARGS(ship:position + velocity:orbit / 100, dV, RGB(1,1,1), "dv", 1, true).
+
+    //throttle control
+    if vang(ship:facing:vector,dV) > 1 { set th to 0. }
+    else { set th to max(0,min(1,dV:mag/10)). }
+    wait 0.
+}
