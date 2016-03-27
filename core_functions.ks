@@ -16,6 +16,23 @@ run execute_node.
 copy establish_orbit from 0.
 run establish_orbit.
 
+FUNCTION HAS_FILE {
+  PARAMETER name.
+  PARAMETER vol.
+
+  SWITCH TO vol.
+  LIST FILES IN allFiles.
+  FOR file IN allFiles {
+    IF file:NAME = name {
+      SWITCH TO 1.
+      RETURN TRUE.
+    }
+  }
+
+  SWITCH TO 1.
+  RETURN FALSE.
+}
+
 
 FUNCTION NOTIFY {
   PARAMETER message.
@@ -59,7 +76,7 @@ function node_change_apsis{
   set rTargetAp to APOAPSIS + body:radius.
     if mode = "a" {
       PRINT "We are changing the Ap".
-      set vPe to sqrt(body:mu * (2/rPE -1/obt:semimajoraxis)). 
+      set vPe to sqrt(body:mu * (2/rPE -1/obt:semimajoraxis)). // This line causes it to break if ship is not in orbit.
       set rTargetAp to targetalt + body:radius.
       set sma_Target to (rTargetAp + (PERIAPSIS + body:radius))/2.
       set vTargetP to sqrt(body:mu * (2/(PERIAPSIS + body:radius) -1/sma_Target)).
@@ -160,7 +177,7 @@ FUNCTION deltaVstage{
 function target_nearest_craft{
 
   list targets in tlist.
-  set minDist to 5. // don't pick something closer than 5 meters.
+  set minDist to 0. // don't pick something closer than 5 meters.
   set smallestDist to 999999999999.
   set nearestVessel to ship. // so at least it's something.
   for t in tlist {
@@ -179,7 +196,7 @@ function target_nearest_craft{
 
 }
 
-function check_if_next_node {
+function check_if_next_node{
   local sentinel is node(time:seconds + 9999999999, 0, 0, 0).
   add sentinel.
   local nn is nextnode.
@@ -191,7 +208,7 @@ function check_if_next_node {
   }
 }
 
-function utilClosestApproach {
+function time_till_Closest_Approach {
   parameter ship1.
   parameter ship2.
 

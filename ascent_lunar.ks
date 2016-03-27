@@ -3,6 +3,7 @@ function ascend_from_moon {
   parameter target_alt is get_safe_orbit()+4000.
   //set target_inclination to (-1)*(90-target:orbit:inclination). if you want to go orbit westerly, normal is east./anticlockwise(?)
   parameter target_inclination is (90-target:orbit:inclination). // This will work so long as the orbit is crossign the position of the ship. (if you are matching a target)
+  sas off.  // Changed aboveto plus because gave correct direction but opposite inclination.
   lock steering to up.
   set runmode to 1.
 
@@ -19,6 +20,12 @@ function ascend_from_moon {
   	if runmode = 1 {
   		if ship:status = "landed" {
   			lock throttle to 1.
+        if legs = true {
+          toggle legs.
+          Print "Waiting for Legs".
+          wait until legs = false. //
+          Print "Legs Deployed". 
+        } 
   			wait 5.
   			set runmode to 2.
   		}

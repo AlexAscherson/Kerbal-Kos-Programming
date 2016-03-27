@@ -159,6 +159,9 @@ function touch_down{
       if(landing_safety_margin* alt_true()) < distance_travelled_under_acceleration_over_time("vertical_burn", time_to_change_speed("vertical_stop")){
         lock throttle to 1.
         set dont_interupt_burn to 1.
+        until verticalspeed >-5{
+          wait 0.1.
+        }
       }
     } 
 
@@ -169,7 +172,7 @@ function touch_down{
 
     if alt_true < 50 and dont_interupt_burn = 0 {
       if verticalspeed < -5 {
-          set throttle_gravity_neutral_vacuum_faster to (throttle_gravity_neutral_vacuum *1.10).
+          set throttle_gravity_neutral_vacuum_faster to (throttle*1.10).
           lock throttle to throttle_gravity_neutral_vacuum_faster.
       }
       if verticalspeed > -5 and verticalspeed< -2 {
@@ -193,7 +196,9 @@ function touch_down{
   lock throttle to 0.
   notify("Final Descent").
   until ship:status = "LANDED"{
-    wait 1.
+    wait 5.
+    UNSET checkpoint_marker. // Brake warning markers.
+    UNSET halfway_marker.
   } 
   
 }
@@ -202,14 +207,21 @@ function Descend_to_land{
 
   parameter decent_point is "At_PE".
 
-  Descend_to_min_safe_orbit(2000).
-  
+  if ship:status = "Sub_Orbital"{ 
+    notify("Sub Orbital Descent!").
+    Update_landing_Variables().
+    wait_for_suicide_burn_point().
+    touch_down().
+    return true.
+  }
 
+  Descend_to_min_safe_orbit(2000).
   if decent_point = "At_PE"{ 
     deorbit().  
     Update_landing_Variables().
     wait_for_suicide_burn_point().
     touch_down().
+    return true.
   }
   if decent_point = "Custom_Decent"{
     // Calculate logic for a custom descent.

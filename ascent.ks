@@ -1,6 +1,6 @@
 function Launch_from_KSC{
 
-  parameter target_alt is 75000.
+  parameter target_alt is 100000.
   parameter ascent_mode is "ascent_profile".
  
   copy execute_node.ks from 0.

@@ -1,102 +1,246 @@
-function get_rendevous_nodes{
-  // You start at point A, your target is somewhere along its orbit at point B and since you're using a Hohmann transfer your intercept point is at C. Your initial orbit has radius r1 = (6378.1 + 500) km = 6878.1 km, while the target's has radius r2 = (6378.1 + 700) km = 7078.1 km.
-    until false{
-        wait 0.1.
-        clearscreen.
-        set currentorbitradius to body:radius+ altitude.
-        set targetorbitradius to body:radius + target:altitude.
+/////////////////////////////////////////////////////////////////////////////
+// Rendezvous with target
+/////////////////////////////////////////////////////////////////////////////
+// Maneuver close to another vessel orbiting the same body.
+/////////////////////////////////////////////////////////////////////////////
+    copy core_functions from 0.
+    run core_functions.
 
-        //Transfer Time - Both Methods work
-        set transfertime to constant():pi * sqrt( (currentorbitradius+targetorbitradius)^3/(8*body:mu) ).  //Standard hoffman transfer.
-        //Transfer Time via SMA
-        set sma_transfer to (currentorbitradius + targetorbitradius)/2.
-        set transfertime1 to 2 * constant():pi * sqrt(sma_transfer^3/body:mu).
-     
-        set theta to sqrt(body:mu/targetorbitradius^3) * transfertime. // theta(degrees target will move during transfer):
+    copy inc2 from 0.
+    run inc2.
         
-        // The correct phase angle for the rendezvous, phi, is then the difference between the angle you travel, 180Ã‚Â°, and the angle the target travels:
-        set phi to constant():pi - theta.
-        //print "Phase angle needed for rendevous(phi) in rad: " + phi +" rad".
-        set phi0 to constant():pi * (1 - sqrt((1+currentorbitradius/targetorbitradius)^3 / 8) ).
+    //copy execute_node from 0.
+    //run execute_node.
 
-        set phaseanglerateofchange to sqrt(body:mu/targetorbitradius^3) - sqrt(body:mu/currentorbitradius^3).
+    copy hoffman_node from 0.
+    run hoffman_node.
 
-        //Get current Angle on target
-        set Angle1 to obt:lan+obt:argumentofperiapsis+obt:trueanomaly. //the ships angle to universal reference direction.
-        set Angle2 to target:obt:lan+target:obt:argumentofperiapsis+target:obt:trueanomaly. //target angle
-        lock Angle3 to Angle2 - Angle1.
-        lock Angle4 to Angle3 - 360 * floor(Angle3/360). 
+   // copy dock from 0.
+   // run dock.
+    copy dock_lib from 0.
+    run dock_lib.
 
-        // current target angular position 
-        set positiontarget to target:position - body:position.
-        set positionlocal to V(0,0,0) - body:position.
-        set targetangularpostioncurrent to arctan2(positiontarget:x,positiontarget:z).
-        lock shipangularpostion_current to arctan2(positionlocal:x,positionlocal:z).
+  //  copy approach from 0.
+  //  run approach.
+   
 
-        //Time till burn window
-        set tb to ((angle4-(phi*(180/constant():pi)))/(57.29577951308*phaseanglerateofchange)). //seconds till window
-        
-        // Finally, the delta-v requirement is simply that of the Hohmann transfer:
-        set dv1 to sqrt(body:mu/currentorbitradius) * (sqrt( 2*targetorbitradius/(currentorbitradius+targetorbitradius) ) - 1). //  print "Dv for transfer: "+ dv1 + " m/s".
-        set dv2 to sqrt(body:mu/targetorbitradius) * (1 - sqrt( 2*currentorbitradius/(currentorbitradius+targetorbitradius) )).//  print "DV to match speed: "+ dv2 + "m/s".   
+  function match_velocites_with_target{
+  /////////////////////////////////////////////////////////////////////////////
+  // Match velocity with target
+  /////////////////////////////////////////////////////////////////////////////
+  // Cancel most velocity with respect to target. Any residual speed will be
+  // small (typically < 1 m/s) and pointed directly at the target.
+  /////////////////////////////////////////////////////////////////////////////
 
-        set intercept_angle to  phi*(180/constant():pi) - angle4.
-        set angles_to_intercept to abs(abs(intercept_angle)- abs(shipangularpostion_current) ).
+  // Don't let unbalanced RCS mess with our velocity
+  rcs off.
+  sas off.
 
-        print "theta1 (degrees target will move during transfer): " + theta*(180/constant():pi)+" deg".
-        print "Phi: - Phase angle needed for rendevous:  " + phi*(180/constant():pi) +" deg". 
-        Print "current angle to target: "+ angle4.
-        //the time to burn is the current time + the time to the correct phase angle.  Travel time needs to be equal to the half of the targets period, - the travel time.
-        print "This is our current angular position from PE" + shipangularpostion_current.
-        //  This is 0 at pe, negative between pe and ae up to -180, becomes positive at ap and declines to 0 at pe.
-        Print "This is the position we need to be when we calculate"+ (angle4-( phi*(180/constant():pi))).
-        //set seconds_to_intercept_point to (abs(abs(shipangularpostion_current) - (angle4-( phi*(180/constant():pi))))) /angles_per_pecond.
-        print "angles_to_intercept" + angles_to_intercept.
-            
-        if angles_to_intercept < 5  {
-            PRINT "Close to calculation point, kill speed.".
-            set warp to 0.
-            if angles_to_intercept < 0.2 {  // changed this from 0.5
-                print "condition true" + (abs(abs(shipangularpostion_current) - (angle4-( phi*(180/constant():pi))))).
-                set warp to 0.
-                break.
-            }        
-        } else {
-            set warp to 4.
-        }
-    }
-    set nd to node(time:seconds + abs(tb), 0, 0, dv1).
-    add nd.
+  // HACK: distinguish between currently-targeted vessel and port using mass > 2 tonnes
+  local station is 0.
+  //if target:mass < 2 {
+ //   set station to target:ship.
+  //} else {
+    set station to target.
+  //}
+
+  local accel is AssertAccel().
+  lock vel to (ship:velocity:orbit - station:velocity:orbit).
+  rcs on.
+  
+  lock steering to lookdirup(-vel:normalized, ship:facing:upvector).
+  wait until vdot(-vel:normalized, ship:facing:forevector) >= 0.99.
+    rcs off.
+
+  Print "Maneuver Braking burn".
+  lock throttle to min(vel:mag / accel, 1.0).
+  when vel:mag < 3 then {
+    lock throttle to min(vel:mag / accel, 0.05).
+  }
+  wait until vel:mag <= 0.2 and vel:z <= 0.
+  unlock throttle.
+  set ship:control:pilotmainthrottle to 0.
+
+  // TODO use RCS to cancel remaining dv
+
+  unlock vel.
+
+  lock steering to lookdirup(station:position, ship:facing:upvector).
+  wait until vdot(station:position, ship:facing:forevector) >= 0.99.
+
+  unlock steering.
+  sas off.
+
 }
 
-function establish_rendevous{
-    copy rendevous_lib from 0.
-    run rendevous_lib.
+function match_velocity_node{
+/////////////////////////////////////////////////////////////////////////////
+// Match velocities at closest approach.
+/////////////////////////////////////////////////////////////////////////////
+// Bring the ship to a stop when it meets up with the target. The accuracy
+// of this program is limited; it'll get you into roughly the same orbit
+// as the target, but fine-tuning will be required if you want to
+// rendezvous.
+/////////////////////////////////////////////////////////////////////////////
+  // Figure out some basics
+  local T is time_till_Closest_Approach(ship, target).
+  local Vship is velocityat(ship, T):orbit.
+  local Vtgt is velocityat(target, T):orbit.
+  local Pship is positionat(ship, T) - body:position.
+  local dv is Vtgt - Vship.
 
-    notify("adjusting orbit for rendevous").
-    node_change_apsis("p", target:periapsis*0.80).
-    execute_node().
-    node_change_apsis("a", target:apoapsis*0.80).
-    execute_node().
-    copy inc from 0.
-    run inc.
-    match_target_inclination_node(target).
-    execute_node().
-    notify("Orbit Now Suitable for rendevous").
-    copy execute_node from 0.
-    run execute_node.
-    get_rendevous_nodes().
-    execute_node().
+  // project dv onto the radial/normal/prograde direction vectors to convert it
+  // from (X,Y,Z) into burn parameters. Estimate orbital directions by looking
+  // at position and velocity of ship at T.
+  local r is Pship:normalized.
+  local p is Vship:normalized.
+  local n is vcrs(r, p):normalized.
+  local sr is vdot(dv, r).
+  local sn is vdot(dv, n).
+  local sp is vdot(dv, p).
 
-    until target:distance < 500 {
-        
-        rdv_cancel(target).
-        rdv_approach(target, 30).
-        rdv_await_nearest(target, 500).
-    }
-    RDV_CANCEL_relative_velocity(target).
+  // figure out the ship's braking time
+  local accel is AssertAccel().
+  local dt is dv:mag / accel.
 
-    rdv_await_nearest(target,500).
-    red_cancel_relative_velocity(target).
+  // Time the burn so that we end thrusting just as we reach the point of closest
+  // approach. Assumes the burn program will perform half of its burn before
+  // T, half afterward
+  add node(T, sr, sn, sp).
 }
 
+function AssertAccel{
+  //parameter prefix.
+
+  local accel is ship:availablethrust / ship:mass. // kN over tonnes; 1000s cancel
+
+  if accel <= 0 {
+    Print "ENGINE FAULT - RESUME CONTROL".
+    //wait 5.
+    //reboot.
+  } else {
+    return accel.
+  }
+}
+
+
+if ship:body <> target:body {
+  Print "Rendezvous Target outside of SoI".
+  //wait 5.
+  //reboot.
+}
+
+function rendevous_transfer_to_target{
+  print "Rendezvous -transfer_to_target".
+  local accel is AssertAccel().
+  local approachT is time_till_Closest_Approach(ship, target).
+  local approachX is (positionat(target, approachT) - positionat(ship, approachT)):mag.
+
+  // Perform Hohmann transfer if necessary
+  if target:position:mag > 25000 and approachX > 25000 {
+    local ri is abs(obt:inclination - target:obt:inclination).
+
+    // Align if necessary
+    if ri > 0.1 {
+      print "Rendezvous - Alignment burn".
+      set_inc_lan(target:orbit:inclination, target:orbit:LAN).
+      execute_node().
+    }
+
+    get_hoffman_node().
+
+    if check_if_next_node() = false {
+      print "Rendezvous, Transfer to phasing orbit".
+      node_change_apsis("a",target:altitude * 1.666).
+      execute_node().
+      node_change_apsis("p",target:altitude * 1.666).
+      execute_node().
+      get_hoffman_node().
+    }
+
+    print "Rendezvous Transfer injection burn".
+    execute_node().
+  }
+
+}
+
+FUNCTION RDV_APPROACH {
+  PARAMETER craft, speed.
+
+  LOCK relativeVelocity TO craft:VELOCITY:ORBIT - SHIP:VELOCITY:ORBIT.
+  RDV_STEER(craft:POSITION). LOCK STEERING TO craft:POSITION.
+
+  LOCK maxAccel TO SHIP:MAXTHRUST / SHIP:MASS.
+  LOCK THROTTLE TO MIN(1, ABS(speed - relativeVelocity:MAG) / maxAccel).
+
+  WAIT UNTIL relativeVelocity:MAG > speed - 0.1.
+  LOCK THROTTLE TO 0.
+  LOCK STEERING TO relativeVelocity.
+}
+
+FUNCTION RDV_AWAIT_NEAREST {
+  PARAMETER craft, minDistance.
+
+  UNTIL 0 {
+    if target:distance > 2000 {
+        set warp to 4.
+      } else {
+        set warp to 0.
+    }
+    SET lastDistance TO craft:DISTANCE.
+    WAIT 0.1.
+    IF craft:distance > lastDistance OR craft:distance < minDistance { 
+      set warp to 0.
+      BREAK. }
+  }
+}
+
+FUNCTION RDV_STEER {
+  PARAMETER vector.
+
+  LOCK STEERING TO vector.
+  WAIT UNTIL VANG(SHIP:FACING:FOREVECTOR, vector) < 2.
+}
+
+function rendevous_approach{
+
+  // Match velocity at closest approach
+  // TODO make node_vel_tgt more accurate and use it here (currently only used for steering guidance)
+  local accel is AssertAccel().
+  set approachT to time_till_Closest_Approach(ship, target).
+  local aprVship is velocityat(ship, approachT):orbit.
+  local aprVtgt is velocityat(target, approachT):orbit.
+  local brakingT is (aprVtgt - aprVship):mag / accel.
+  sas off.
+ // match_velocity_node().
+
+  //lock steering to lookdirup(nextnode:deltav, ship:facing:topvector).
+  //wait until vdot(nextnode:deltav:normalized, ship:facing:vector) > 0.99.
+  //unlock steering.
+ // remove nextnode.
+  lock steering to retrograde.
+  print "Warping Closer.".
+ 
+  warpto(time:seconds+(ship:orbit:period/3)).  // This works?
+  print "Awaiting Nearest Approach".
+  RDV_AWAIT_NEAREST(target, 200).
+
+  //sas on.
+  match_velocites_with_target().
+  print "Matching Velocities".
+  if target:distance > 500 {
+    print "Approaching".
+    RDV_APPROACH(target,5).
+    print "Waiting for Nearest".
+    RDV_AWAIT_NEAREST(target, 200).
+    print "Matching Velocities".
+    match_velocites_with_target().
+  }
+  
+  sas off.
+ 
+  //approach_target().
+ // wait until target:position:mag < 1000.
+ // dock().
+
+}

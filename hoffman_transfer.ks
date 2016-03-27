@@ -61,7 +61,7 @@ function CalcHoffmantransfer{
     set currentvelocity to velocity:orbit:mag.          // actual velocity
     set averagevelocity to sqrt( currentvelocity^2 - 2*body:mu*(1/altitudeaverage - 1/altitudecurrent) ). // average velocity 
     set soi to (tgtbody:soiradius).
-    set transferAp to positiontarget:mag - soi/3.
+    set transferAp to positiontarget:mag - (0.3*soi).
 
     //Transfer SMA
     set sma_transfer to (altitudeaverage + transferAp)/2.

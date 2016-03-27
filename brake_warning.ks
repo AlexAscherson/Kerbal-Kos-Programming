@@ -78,7 +78,7 @@ function time_to_change_speed{
 
 function get_brake_warning{
 
-  set safetymarginalt to 1.15.
+  set safetymarginalt to 150. // set to -150 for minmus, test on moon wsset to * 1.2
 
   lock prediction_distance to distance_travelled_under_acceleration_over_time("horizontal_burn", time_to_change_speed("horizontal_stop")). 
   lock terrain_position_at_prediction to get_terrain(ship:geoposition,ship:bearing,prediction_distance,body:radius).
@@ -87,7 +87,7 @@ function get_brake_warning{
   lock predicted_alt_after_fall to (altitude - predicted_fall).
   lock verticalspeed_after_fall to (verticalspeed-abs(get_local_grav_acceleration()*time_to_change_speed("horizontal_stop"))).
 
-  lock predicted_true_alt_after_fall to (predicted_alt_after_fall - terrain_position_at_prediction:terrainheight)*safetymarginalt.//
+  lock predicted_true_alt_after_fall to (predicted_alt_after_fall - terrain_position_at_prediction:terrainheight)-safetymarginalt.//
 
   if predicted_true_alt_after_fall < distance_travelled_under_acceleration_over_time("vertical_burn", time_to_change_speed("vertical_stop",0,verticalspeed_after_fall),verticalspeed_after_fall){
     print "!!!Impact Alert!!! - Predicted Alt < Vertical Stopping Distance".
