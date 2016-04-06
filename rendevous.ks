@@ -141,7 +141,7 @@ function rendevous_transfer_to_target{
     local ri is abs(obt:inclination - target:obt:inclination).
 
     // Align if necessary
-    if ri > 0.1 {
+    if ri > 0.1 {  // Sometimes you need 2 of these?
       print "Rendezvous - Alignment burn".
       set_inc_lan(target:orbit:inclination, target:orbit:LAN).
       execute_node().

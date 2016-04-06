@@ -33,7 +33,7 @@ function execute_node{
 
     print "Executing Node".
     set nd to nextnode.
-
+    wait 0.1.
     if deltaVstage() < nd:deltav:mag{
         stage.
     }

@@ -117,7 +117,8 @@ FUNCTION dok_dock {
   dockingPort:controlfrom.
 
   RCS ON.
-  dok_ensure_range(targetVessel, dockingPort, 100, 1).
+  wait 1.
+  //dok_ensure_range(targetVessel, dockingPort, 200, 1).
 
   // SET targetPort TO dok_get_port(targetPortTag).
 
@@ -131,7 +132,7 @@ FUNCTION dok_dock {
   }.
 
   dok_kill_relative_velocity(targetPort).
-  dok_sideswipe_port(targetPort, dockingPort, 100, 5).
+  dok_sideswipe_port(targetPort, dockingPort, 200, 5).
   dok_approach_port(targetPort, dockingPort, 100, 5).
   dok_approach_port(targetPort, dockingPort, 50, 2).
   dok_approach_port(targetPort, dockingPort, 20, 1).

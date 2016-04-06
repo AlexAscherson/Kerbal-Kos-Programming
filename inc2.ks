@@ -45,11 +45,11 @@ function set_inc_lan {
     local ship_ref to mod(obt:lan+obt:argumentofperiapsis+obt:trueanomaly,360).
 
     local ship_2_node to mod((720 + node_lng - ship_ref),360).
-    if ship_2_node > 180 {
-        print "Switching to DN".
-        set dv_factor to -1.
-        set node_lng to mod(node_lng + 180,360).
-    }       
+    //if ship_2_node > 180 {  // Might need to check if the nextnode ri to target is better in ###as it gets it wrong sometimes.
+    //    print "Switching to DN".
+    //    set dv_factor to -1.
+    //    set node_lng to mod(node_lng + 180,360).
+    //}       
 
     local node_true_anom to 360- mod(720 + (obt:lan + obt:argumentofperiapsis) - node_lng , 360 ).
     local ecc to OBT:ECCENTRICITY.

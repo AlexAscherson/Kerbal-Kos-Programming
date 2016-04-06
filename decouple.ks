@@ -8,6 +8,7 @@ function decouple_port{
         print "should undock".
         // if port::GETMODULE("ModuleDockingNode"):allevents //to get events array.
         port:GETMODULE("ModuleDockingNode"):doevent("decouple node").
+        wait 5.
       }
     }
   }

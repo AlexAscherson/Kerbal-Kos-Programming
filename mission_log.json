@@ -1,0 +1,9 @@
+{
+    "entries": [
+        "Ship_name",
+        "Latest Test Probe",
+        "Status",
+        "Prelaunch"
+    ],
+    "$type": "kOS.Safe.Encapsulation.Lexicon"
+}

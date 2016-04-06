@@ -112,6 +112,7 @@ function hohmann {
 }
 
 function get_hoffman_node{
+  parameter cleanup is true.
   if body <> target:body {
     print "Node Incompatible orbits".
   }
@@ -133,6 +134,9 @@ function get_hoffman_node{
   if node_T > 0 {
     add node(node_T, 0, 0, node_dv).
   } else {
+    if cleanup = false {
+      add node(node_T, 0, 0, node_dv).
+    }
     print "Node NO TRANSFER WINDOW".
   }
 

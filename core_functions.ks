@@ -3,6 +3,8 @@
 
 copy get_planet_data from 0.
 run get_planet_data.
+copy mission_logger from 0.
+run mission_logger.
 
 copy circ from 0.
 run circ.
@@ -12,9 +14,6 @@ run time_warp.
 
 copy execute_node from 0.
 run execute_node.
-
-copy establish_orbit from 0.
-run establish_orbit.
 
 FUNCTION HAS_FILE {
   PARAMETER name.

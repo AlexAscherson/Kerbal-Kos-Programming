@@ -1,15 +1,19 @@
 
 function transfer_node{
     parameter tgtbody.    
+    parameter cleanup_node is true.
 
-    if (apoapsis-periapsis) > (apoapsis*0.01) { // check relationly to ap in case very high up.
+    //if (apoapsis-periapsis) > (apoapsis*0.01) { // check relationly to ap in case very high up.
+    if SHIP:ORBIT:ECCENTRICITY > 0.05 {
         notify("Circularising orbit for Transfer").
 
         circ_with_node().
         execute_node().
-
     }
-    if ((ship:orbit:inclination + tgtbody:orbit:inclination-0.2)/2) > (tgtbody:orbit:inclination +0.2) or ((ship:orbit:inclination + tgtbody:orbit:inclination)/2) < (tgtbody:orbit:inclination -0.2) {
+    local ri is abs(obt:inclination - (target:obt:inclination+0.01)).
+    // Align if necessary
+    if ri > 0.1 {
+    //if ((ship:orbit:inclination + tgtbody:orbit:inclination-0.2)/2) > (tgtbody:orbit:inclination +0.2) or ((ship:orbit:inclination + tgtbody:orbit:inclination)/2) < (tgtbody:orbit:inclination -0.2) {
         notify("Matching Inclination").
         copy inc2 from 0.
         run inc2.
@@ -29,7 +33,10 @@ function transfer_node{
 
         if encounter = "none"{
             print "T+" + round(missiontime) + " WARNING! No encounter found.".
-            remove nd.
+            if cleanup_node {
+              remove nd. 
+            }
+           
             set done to True.
             return false.
             // Need some logic here to wait for longer or warp till maybe moon gets out of the way.
@@ -58,7 +65,7 @@ function CalcHoffmantransfer{
     set bodyradius to body:radius.
     set altitudecurrent to bodyradius + altitude.                 // actual distance to body
     set altitudeaverage to bodyradius + (periapsis+apoapsis)/2.  // average radius (burn angle not yet known)
-    set currentvelocity to velocity:orbit:mag.          // actual velocity
+    set currentvelocity to ship:velocity:orbit:mag.          // actual velocity
     set averagevelocity to sqrt( currentvelocity^2 - 2*body:mu*(1/altitudeaverage - 1/altitudecurrent) ). // average velocity 
     set soi to (tgtbody:soiradius).
     set transferAp to positiontarget:mag - (0.3*soi).

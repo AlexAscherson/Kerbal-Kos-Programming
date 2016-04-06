@@ -20,13 +20,26 @@ function ascend_from_moon {
   	if runmode = 1 {
   		if ship:status = "landed" {
   			lock throttle to 1.
+        wait 1.
+        toggle legs.
+        wait 2.
         if legs = true {
           toggle legs.
-          Print "Waiting for Legs".
-          wait until legs = false. //
-          Print "Legs Deployed". 
+          Print "Retracting Legs".
+          wait 1.
+          gear off.
+          wait 1.
+          gear off.
+          //wait until legs = false. //
+          //Print "Legs Deployed". 
         } 
-  			wait 5.
+  			wait 4.
+        if legs = true {
+          toggle gear.
+          Print "Error - Retracting legs again".
+          //wait until legs = false. //
+          //Print "Legs Deployed". 
+        } 
   			set runmode to 2.
   		}
   	}
